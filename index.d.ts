@@ -57,5 +57,7 @@ declare module 'react-native-contacts' {
       suffix: string;
       department: string;
       birthday: Birthday;
+      note: string;
+      nickname: string;
   }
 }
