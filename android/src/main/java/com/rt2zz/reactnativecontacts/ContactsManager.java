@@ -22,6 +22,7 @@ import android.provider.ContactsContract.CommonDataKinds.Organization;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.Website;
+import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.RawContacts;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -231,6 +232,8 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
         String company = contact.hasKey("company") ? contact.getString("company") : null;
         String jobTitle = contact.hasKey("jobTitle") ? contact.getString("jobTitle") : null;
         String department = contact.hasKey("department") ? contact.getString("department") : null;
+        String note = contact.hasKey("note") ? contact.getString("note") : null;
+        String nickname = contact.hasKey("nickname") ? contact.getString("nickname") : null;
         String thumbnailPath = contact.hasKey("thumbnailPath") ? contact.getString("thumbnailPath") : null;
 
         ReadableArray phoneNumbers = contact.hasKey("phoneNumbers") ? contact.getArray("phoneNumbers") : null;
@@ -320,6 +323,16 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
         organization.put(Organization.TITLE, jobTitle);
         organization.put(Organization.DEPARTMENT, department);
         contactData.add(organization);
+
+        ContentValues note = new ContentValues();
+        note.put(ContactsContract.Data.MIMETYPE, Note.CONTENT_ITEM_TYPE);
+        note.put(Note.NOTE, note);
+        contactData.add(note);
+
+        ContentValues nickname = new ContentValues();
+        nickname.put(ContactsContract.Data.MIMETYPE, Nickname.CONTENT_ITEM_TYPE);
+        nickname.put(Nickname.NAME, nickname);
+        contactData.add(nickname);
 
         for (int i = 0; i < numOfUrls; i++) {
             ContentValues url = new ContentValues();
@@ -415,6 +428,7 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
         String jobTitle = contact.hasKey("jobTitle") ? contact.getString("jobTitle") : null;
         String department = contact.hasKey("department") ? contact.getString("department") : null;
         String note = contact.hasKey("note") ? contact.getString("note") : null;
+        String nickname = contact.hasKey("nickname") ? contact.getString("nickname") : null;
         String thumbnailPath = contact.hasKey("thumbnailPath") ? contact.getString("thumbnailPath") : null;
 
         ReadableArray phoneNumbers = contact.hasKey("phoneNumbers") ? contact.getArray("phoneNumbers") : null;
@@ -486,6 +500,13 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
                 .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
                 .withValue(ContactsContract.Data.MIMETYPE, Note.CONTENT_ITEM_TYPE)
                 .withValue(ContactsContract.CommonDataKinds.Note.NOTE, note);
+        ops.add(op.build());
+
+        op = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, Nickname.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Nickname.NAME, nickname);
+                .withValue(ContactsContract.CommonDataKinds.Nickname.TYPE, ContactsContract.CommonDataKinds.Nickname.TYPE_DEFAULT);
         ops.add(op.build());
 
         op = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
@@ -607,6 +628,7 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
         String jobTitle = contact.hasKey("jobTitle") ? contact.getString("jobTitle") : null;
         String department = contact.hasKey("department") ? contact.getString("department") : null;
         String note = contact.hasKey("note") ? contact.getString("note") : null;
+        String nickname = contact.hasKey("nickname") ? contact.getString("nickname") : null;
         String thumbnailPath = contact.hasKey("thumbnailPath") ? contact.getString("thumbnailPath") : null;
 
         ReadableArray phoneNumbers = contact.hasKey("phoneNumbers") ? contact.getArray("phoneNumbers") : null;
@@ -728,6 +750,19 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
                 .withValue(Organization.COMPANY, company)
                 .withValue(Organization.TITLE, jobTitle)
                 .withValue(Organization.DEPARTMENT, department);
+        ops.add(op.build());
+
+        op = ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                .withSelection(ContactsContract.Data.CONTACT_ID + "=?", new String[]{String.valueOf(recordID)})
+                .withValue(ContactsContract.Data.MIMETYPE, Note.CONTENT_ITEM_TYPE)
+                .withValue(Note.NOTE, note);
+        ops.add(op.build());
+
+        op = ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                .withSelection(ContactsContract.Data.CONTACT_ID + "=?", new String[]{String.valueOf(recordID)})
+                .withValue(ContactsContract.Data.MIMETYPE, Nickname.CONTENT_ITEM_TYPE)
+                .withValue(Nickname.NAME, nickname)
+                .withValue(Nickname.TYPE, Nickname.TYPE_DEFAULT);
         ops.add(op.build());
 
         op.withYieldAllowed(true);

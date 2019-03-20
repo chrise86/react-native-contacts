@@ -27,6 +27,7 @@ import static android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import static android.provider.ContactsContract.CommonDataKinds.Note;
 import static android.provider.ContactsContract.CommonDataKinds.Website;
 import static android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+import static android.provider.ContactsContract.CommonDataKinds.Nickname;
 
 public class ContactsProvider {
     public static final int ID_FOR_PROFILE_CONTACT = -1;
@@ -70,6 +71,9 @@ public class ContactsProvider {
         add(Website.URL);
         add(Event.START_DATE);
         add(Event.TYPE);
+        add(Nickname.NAME);
+        add(Nickname.TYPE);
+        add(Nickname.LABEL);
     }};
 
     private static final List<String> FULL_PROJECTION = new ArrayList<String>() {{
@@ -317,6 +321,9 @@ public class ContactsProvider {
                         contact.phones.add(new Contact.Item(label, phoneNumber, id));
                     }
                     break;
+                case Nickname.CONTENT_ITEM_TYPE:
+                    contact.nickname = cursor.getString(cursor.getColumnIndex(Nickname.NAME));
+                    break;
                 case Email.CONTENT_ITEM_TYPE:
                     String email = cursor.getString(cursor.getColumnIndex(Email.ADDRESS));
                     int emailType = cursor.getInt(cursor.getColumnIndex(Email.TYPE));
@@ -425,7 +432,8 @@ public class ContactsProvider {
         private String company = "";
         private String jobTitle = "";
         private String department = "";
-        private String note ="";
+        private String note = "";
+        private String nickname = "";
         private List<Item> urls = new ArrayList<>();
         private boolean hasPhoto = false;
         private String photoUri;
@@ -452,6 +460,7 @@ public class ContactsProvider {
             contact.putString("jobTitle", jobTitle);
             contact.putString("department", department);
             contact.putString("note", note);
+            contact.putString("nickname", nickname);
             contact.putBoolean("hasThumbnail", this.hasPhoto);
             contact.putString("thumbnailPath", photoUri == null ? "" : photoUri);
 

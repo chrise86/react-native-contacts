@@ -86,7 +86,8 @@ RCT_EXPORT_METHOD(getContactsMatchingString:(NSString *)string callback:(RCTResp
                       CNContactImageDataAvailableKey,
                       CNContactNoteKey,
                       CNContactUrlAddressesKey,
-                      CNContactBirthdayKey
+                      CNContactBirthdayKey,
+                      CNContactNicknameKey
                       ];
     NSArray *arrayOfContacts = [store unifiedContactsMatchingPredicate:[CNContact predicateForContactsMatchingName:searchString]
                                                            keysToFetch:keys
@@ -141,7 +142,8 @@ RCT_EXPORT_METHOD(getAllWithoutPhotos:(RCTResponseSenderBlock) callback)
                                        CNContactImageDataAvailableKey,
                                        CNContactNoteKey,
                                        CNContactUrlAddressesKey,
-                                       CNContactBirthdayKey
+                                       CNContactBirthdayKey,
+                                       CNContactNicknameKey
                                        ]];
 
     if(withThumbnails) {
@@ -169,6 +171,7 @@ RCT_EXPORT_METHOD(getAllWithoutPhotos:(RCTResponseSenderBlock) callback)
     NSString *company = person.organizationName;
     NSString *jobTitle = person.jobTitle;
     NSString *note = person.note;
+    NSString *nickname = person.nickname;
     NSDateComponents *birthday = person.birthday;
 
     [output setObject:recordID forKey: @"recordID"];
@@ -181,20 +184,24 @@ RCT_EXPORT_METHOD(getAllWithoutPhotos:(RCTResponseSenderBlock) callback)
         [output setObject: (familyName) ? familyName : @"" forKey:@"familyName"];
     }
 
-    if(middleName){
+    if (middleName) {
         [output setObject: (middleName) ? middleName : @"" forKey:@"middleName"];
     }
 
-    if(company){
+    if (company) {
         [output setObject: (company) ? company : @"" forKey:@"company"];
     }
 
-    if(jobTitle){
+    if (jobTitle) {
         [output setObject: (jobTitle) ? jobTitle : @"" forKey:@"jobTitle"];
     }
 
-    if(note){
+    if (note) {
         [output setObject: (note) ? note : @"" forKey:@"note"];
+    }
+
+    if (nickname) {
+        [output setObject: (nickname) ? nickname : @"" forKey:@"nickname"];
     }
 
     if (birthday) {
@@ -438,7 +445,7 @@ RCT_EXPORT_METHOD(openContactForm:(NSDictionary *)contactData callback:(RCTRespo
     [self updateRecord:contact withData:contactData];
 
     CNContactViewController *controller = [CNContactViewController viewControllerForNewContact:contact];
-    
+
     controller.delegate = self;
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -567,7 +574,8 @@ RCT_EXPORT_METHOD(updateContact:(NSDictionary *)contactData callback:(RCTRespons
                              CNContactImageDataKey,
                              CNContactNoteKey,
                              CNContactUrlAddressesKey,
-                             CNContactBirthdayKey
+                             CNContactBirthdayKey,
+                             CNContactNicknameKey
                              ];
 
     @try {
@@ -595,6 +603,7 @@ RCT_EXPORT_METHOD(updateContact:(NSDictionary *)contactData callback:(RCTRespons
     NSString *company = [contactData valueForKey:@"company"];
     NSString *jobTitle = [contactData valueForKey:@"jobTitle"];
     NSString *note = [contactData valueForKey:@"note"];
+    NSString *nickname = [contactData valueForKey:@"nickname"];
 
     NSDictionary *birthday = [contactData valueForKey:@"birthday"];
 
@@ -604,6 +613,7 @@ RCT_EXPORT_METHOD(updateContact:(NSDictionary *)contactData callback:(RCTRespons
     contact.organizationName = company;
     contact.jobTitle = jobTitle;
     contact.note = note;
+    contact.nickname = nickname;
 
     if (birthday) {
         NSDateComponents *components;
@@ -709,7 +719,7 @@ RCT_EXPORT_METHOD(updateContact:(NSDictionary *)contactData callback:(RCTRespons
 + (NSData*) imageData:(NSString*)sourceUri
 {
     NSURL *url = [NSURL URLWithString:sourceUri];
-    
+
     if([sourceUri hasPrefix:@"assets-library"]){
         return [RCTContacts loadImageAsset:[NSURL URLWithString:sourceUri]];
     } else if (url && url.scheme && url.host) {
